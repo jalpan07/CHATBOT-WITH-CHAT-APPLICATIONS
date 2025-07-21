@@ -1,0 +1,28 @@
+global:
+  scrape_interval: 15s
+
+
+scrape_configs:
+  - job_name: 'node_app'
+    static_configs:
+      - targets: ['localhost:3000']
+
+
+scrape_configs:
+  - job_name: 'node_app'
+    static_configs:
+      - targets: ['localhost:5000']
+
+
+
+# scrape_configs:
+#   - job_name: 'my-service'
+#     static_configs:
+#       - targets: ['<service_host>:<metrics_port>'] # Replace with actual target
+.\prometheus.exe --config.file=prometheus.yml
+
+
+.\prometheus.exe --config.file=prometheus.yml --web.listen-address=:9091
+
+
+curl.exe -i http://localhost:8000/chatbot

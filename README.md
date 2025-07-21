@@ -30,7 +30,7 @@ To run the project locally, follow these steps:
 
     bash
 
-git clone https://github.com/jalpan07/CHATBOT-WITH-CHAT-APPLICATIONS
+git clone https://github.com/Manav7603/ChatBot-with-Chat-Application.git
 
 Navigate to the project directory:
 

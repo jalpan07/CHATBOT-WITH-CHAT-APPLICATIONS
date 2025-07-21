@@ -1,0 +1,11 @@
+_format_version: "3.0"
+
+services:
+  - name: chatbot-service
+    url: http://host.docker.internal:3000  # React app running on port 3000
+    routes:
+      - name: chatbot-api-route
+        paths:
+          - /chatbot
+
+# Ensure that static file routes are not handled by Kong

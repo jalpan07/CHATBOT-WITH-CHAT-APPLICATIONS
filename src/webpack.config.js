@@ -1,6 +1,12 @@
 const path = require('path');
 
 module.exports = {
+  plugins: [
+    new webpack.ProvidePlugin({
+        process: 'process/browser',
+        Buffer: ['buffer', 'Buffer'],
+    }),
+],
   resolve: {
     fallback: {
       "stream": require.resolve("stream-browserify"),
@@ -14,6 +20,9 @@ module.exports = {
       "net": require.resolve("net-browserify"),
       "child_process": false,
       "tls": require.resolve("tls-browserify"),
+      // "stream": require.resolve("stream-browserify"), 
+      "buffer": require.resolve("buffer/"),
+      "zlib": require.resolve("browserify-zlib"),
     }
   },
   entry: './src/app.js', // Adjust the entry point according to your project structure

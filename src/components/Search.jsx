@@ -24,9 +24,15 @@ const Search = () => {
       collection(db, "users"),
       where("displayName", "==", username)
     );
-
+    const p=query(collection(db,"users")
+     
+  )
+  const data=await getDocs(p);
+  console.log("data",data)
+    console.log(q);
     try {
       const querySnapshot = await getDocs(q);
+      console.log(querySnapshot);
       querySnapshot.forEach((doc) => {
         setUser(doc.data());
       });

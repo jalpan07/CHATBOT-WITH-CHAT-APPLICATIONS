@@ -18,11 +18,12 @@ const Register = () => {
     const email = e.target[1].value;
     const password = e.target[2].value;
     const file = e.target[3].files[0];
+    console.log(file,email,password,displayName);
 
     try {
       //Create user
       const res = await createUserWithEmailAndPassword(auth, email, password);
-
+console.log(res);
       //Create a unique image name
       const date = new Date().getTime();
       const storageRef = ref(storage, `${displayName + date}`);

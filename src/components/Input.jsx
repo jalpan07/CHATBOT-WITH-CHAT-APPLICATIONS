@@ -4,10 +4,11 @@ import Attach from "../img/attach.png";
 import { AuthContext } from "../context/AuthContext";
 import { ChatContext } from "../context/ChatContext";
 import axios from "axios";
+
 import {
 	arrayUnion,
 	doc,
-	serverTimestamp,
+	serverTimestamp, 
 	Timestamp,
 	updateDoc,
 	// getDoc,
@@ -27,8 +28,9 @@ const Input = () => {
 
 	const { currentUser } = useContext(AuthContext);
 	const { data } = useContext(ChatContext);
-
+	const { sendMessage } = useContext(ChatContext);
 	const handleSend = async () => {
+		sendMessage(text);
 		if (img) {
 			const storageRef = ref(storage, uuid());
 			console.log(storageRef);
@@ -92,90 +94,181 @@ const Input = () => {
 			[data.chatId + ".date"]: serverTimestamp(),
 		});
 
+		// setText("");
+		// setImg(null);
+
+
+
+
+		if (data.user.displayName === "ChatBot") {
+			console.log("Chatbot");
+			try {
+				// Send user message to Gemini API through backend
+				const response = await axios.post("http://127.0.0.1:6969", {
+					query: text,
+				});
+	
+				const botReply = response.data.message || "No response received.";
+				
+				// Add ChatBot's reply to Firestore
+				await updateDoc(doc(db, "chats", data.chatId), {
+					messages: arrayUnion({
+						id: uuid(),
+						text: botReply,
+						senderId: "ChatBot",
+						date: Timestamp.now(),
+					}),
+				});
+	
+				// Update the last message for both users
+				await Promise.all([
+					updateDoc(doc(db, "userChats", data.user.uid), {
+						[`${data.chatId}.lastMessage`]: { text: botReply },
+						[`${data.chatId}.date`]: serverTimestamp(),
+					}),
+					updateDoc(doc(db, "userChats", currentUser.uid), {
+						[`${data.chatId}.lastMessage`]: { text: botReply },
+						[`${data.chatId}.date`]: serverTimestamp(),
+					}),
+				]);
+			} catch (error) {
+				console.error("Error fetching ChatBot response:", error);
+			}
+		}
+	
+
+
+		else if (data.user.displayName === "Windows") {
+			console.log("Calc");
+			if (text.toLowerCase() === "open calc") {
+				const botReply = "Opening Calculator...";
+				console.log("Calc2");
+				// Add the response to Firestore
+				await updateDoc(doc(db, "chats", data.chatId), {
+					messages: arrayUnion({
+						id: uuid(),
+						text: botReply,
+						senderId: "Windows",
+						date: Timestamp.now(),
+					}),
+				});
+		
+				try {
+					// Call the backend API to open the calculator
+					const response = await axios.post("http://localhost:6900/open-calc", {
+						command: "open calc",
+					});
+		
+					if (response.data.message) {
+						console.log(response.data.message); // Successfully opened the calculator
+					} else {
+						console.error("Error opening calculator.");
+					}
+		
+					// Update the last message for both users
+					await Promise.all([
+						updateDoc(doc(db, "userChats", data.user.uid), {
+							[`${data.chatId}.lastMessage`]: { text: botReply },
+							[`${data.chatId}.date`]: serverTimestamp(),
+						}),
+						updateDoc(doc(db, "userChats", currentUser.uid), {
+							[`${data.chatId}.lastMessage`]: { text: botReply },
+							[`${data.chatId}.date`]: serverTimestamp(),
+						}),
+					]);
+				} catch (error) {
+					console.error("Error calling the backend API:", error);
+				}
+			}
+		}
+		
+
+
+		// Clear the input field and image
 		setText("");
 		setImg(null);
 
-		if (data.user.displayName === "ChatBOT") {
-            await updateDoc(
-                doc(db, "chats", data.chatId),
-                {
-                    messages: arrayUnion(
-                        {
-                            id: uuid(),
-                            text: text,
-                            senderId: "ChatBOT", 
-                            date: Timestamp.now(),
-                        }
-                    ),
-               }
-            ); 
-			await updateDoc(doc(db, "userChats", data.user.uid), {
-				[data.chatId + ".lastMessage"]: {
-					text,
-				},
-				[data.chatId + ".date"]: serverTimestamp(),
-			});
+		// if (data.user.displayName === "ChatBot") {
+        //     await updateDoc(
+        //         doc(db, "chats", data.chatId),
+        //         {
+        //             messages: arrayUnion(
+        //                 {
+        //                     id: uuid(),
+        //                     text: text,
+        //                     senderId: "ChatBot", 
+        //                     date: Timestamp.now(),
+        //                 }
+        //             ),
+        //        }
+        //     ); 
+		// 	await updateDoc(doc(db, "userChats", data.user.uid), {
+		// 		[data.chatId + ".lastMessage"]: {
+		// 			text,
+		// 		},
+		// 		[data.chatId + ".date"]: serverTimestamp(),
+		// 	});
 			
-			await updateDoc(doc(db, "userChats", currentUser.uid), {
-				[data.chatId + ".lastMessage"]: {
-					text,
-				},
-				[data.chatId + ".date"]: serverTimestamp(),
-			});
+		// 	await updateDoc(doc(db, "userChats", currentUser.uid), {
+		// 		[data.chatId + ".lastMessage"]: {
+		// 			text,
+		// 		},
+		// 		[data.chatId + ".date"]: serverTimestamp(),
+		// 	});
 
 
 
-			try {
-				const response = await axios.post('http://127.0.0.1:6969', {
-					query:text
-				});
+		// 	try {
+		// 		const response = await axios.post('http://127.0.0.1:6969', {
+		// 			query:text
+		// 		});
 
-				await updateDoc(
-					doc(db, "chats", data.chatId),
-					{
-						messages: arrayUnion(
-							{
-								id: uuid(),
-								text: response.data,
-								senderId: "ChatBOT", 
-								date: Timestamp.now(),
-							}
-						),
-				   }
-				);
+		// 		await updateDoc(
+		// 			doc(db, "chats", data.chatId),
+		// 			{
+		// 				messages: arrayUnion(
+		// 					{
+		// 						id: uuid(),
+		// 						text: response.data,
+		// 						senderId: "ChatBot", 
+		// 						date: Timestamp.now(),
+		// 					}
+		// 				),
+		// 		   }
+		// 		);
 
-				console.log("Response data:", response.data);
-				// const columns = response.data.columns;
-				// const data = response.data.data;
-				console.log("Columns:", response.data['columns']);
-				console.log("Data:", response.data['data']);
+				// console.log("Response data:", response.data);
+				// // const columns = response.data.columns;
+				// // const data = response.data.data;
+				// console.log("Columns:", response.data['columns']);
+				// console.log("Data:", response.data['data']);
 
-				// Construct the table header
-				let tableText = response.data.columns.join("\t") + "\n";
+				// // Construct the table header
+				// let tableText = response.data.columns.join("\t") + "\n";
 
-				// Construct the table rows
-				response.data.data. forEach(row => {
-					console.log("Row:", row);
-					tableText += row.join("\t") + "\n";
-				});
+				// // Construct the table rows
+				// response.data.data. forEach(row => {
+				// 	console.log("Row:", row);
+				// 	tableText += row.join("\t") + "\n";
+				// });
 								
-				await updateDoc(
-					doc(db, "chats", data.chatId),
-					{
-						messages: arrayUnion(
-							{
-								id: uuid(),
-								text: tableText,
-								senderId: "ChatBOT", 
-								date: Timestamp.now(),
-							}
-						),
-				   }
-				);
+			// 	await updateDoc(
+			// 		doc(db, "chats", data.chatId),
+			// 		{
+			// 			messages: arrayUnion(
+			// 				{
+			// 					id: uuid(),
+			// 					text: tableText,
+			// 					senderId: "ChatBOT", 
+			// 					date: Timestamp.now(),
+			// 				}
+			// 			),
+			// 	   }
+			// 	);
 
-			} catch (error) {
-				console.error('Error:', error);
-			}
+			// } catch (error) {
+			// 	console.error('Error:', error);
+			// }
 
 			// const textFileContent = `Sender: ${currentUser.displayName}\nDate: ${new Date().toLocaleString()}\nMessage: ${text}`;
 			// const blob = new Blob([textFileContent], { type: 'text/plain' });
@@ -200,14 +293,14 @@ const Input = () => {
 			// const newContent = `${existingContent}Sender: ${currentUser.displayName}\nDate: ${new Date().toLocaleString()}\nMessage: ${text}\n`;
 			// await uploadBytes(fileRef, new Blob([newContent], { type: 'text/plain' }), { contentType: 'text/plain' });
 		
-			const textFileContent = `Sender: ${currentUser.displayName}\nDate: ${new Date().toLocaleString()}\nMessage: ${text}\n`;
-			const fileRef = ref(storage, `chatbot_messages/${currentUser.uid}.txt`); // Use sender's ID as filename
-			const metadata = await getMetadata(fileRef).catch(() => null); // Check if file exists
-			if (metadata) {
-				await uploadBytes(fileRef, new Blob([textFileContent], { type: 'text/plain' }), { contentType: 'text/plain', customMetadata: { 'append': 'true' } }); // Append content to existing file
-			} else {
-				await uploadBytes(fileRef, new Blob([textFileContent], { type: 'text/plain' })); // Create new file
-			}
+			// const textFileContent = `Sender: ${currentUser.displayName}\nDate: ${new Date().toLocaleString()}\nMessage: ${text}\n`;
+			// const fileRef = ref(storage, `chatbot_messages/${currentUser.uid}.txt`); // Use sender's ID as filename
+			// const metadata = await getMetadata(fileRef).catch(() => null); // Check if file exists
+			// if (metadata) {
+			// 	await uploadBytes(fileRef, new Blob([textFileContent], { type: 'text/plain' }), { contentType: 'text/plain', customMetadata: { 'append': 'true' } }); // Append content to existing file
+			// } else {
+			// 	await uploadBytes(fileRef, new Blob([textFileContent], { type: 'text/plain' })); // Create new file
+			// }
 
 
 
@@ -216,9 +309,10 @@ const Input = () => {
 
 
 
-        }
+        // }
 
 	};
+
 	return (
 		<div className='input'>
 			<input
@@ -247,3 +341,11 @@ const Input = () => {
 };
 
 export default Input;
+
+
+
+
+
+
+
+

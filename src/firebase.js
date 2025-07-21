@@ -16,12 +16,14 @@ import { getFirestore } from "firebase/firestore";
 // };
 
 const firebaseConfig = {
-  apiKey: "API KEY",
-  authDomain: "friendly-chat-m7603.firebaseapp.com",
-  projectId: "friendly-chat-m7603",
-  storageBucket: "friendly-chat-m7603.appspot.com",
-  messagingSenderId: "578825333117",
-  appId: "1:578825333117:web:9ee3a0482fb776f2f0c414"
+  apiKey: "AIzaSyCsjLWGFwuRPpST3Oj4knUthFIyjSzaISk",
+  authDomain: "chatsandbot.firebaseapp.com",
+  databaseURL: "https://chatsandbot-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "chatsandbot",
+  storageBucket: "chatsandbot.appspot.com",
+  messagingSenderId: "124516482080",
+  appId: "1:124516482080:web:24cbc950e7ac80d1e61045",
+  measurementId: "G-L2NZSGNJHR"
 };
 
 
